@@ -521,6 +521,42 @@ abstract class AppL10n {
   /// **'This action cannot be undone.'**
   String get orderDeleteConfirmMsg;
 
+  /// No description provided for @orderScanReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Receipt to Auto-fill'**
+  String get orderScanReceipt;
+
+  /// No description provided for @orderScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognizing...'**
+  String get orderScanning;
+
+  /// No description provided for @orderScanFromCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get orderScanFromCamera;
+
+  /// No description provided for @orderScanFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Album'**
+  String get orderScanFromGallery;
+
+  /// No description provided for @orderScanSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition done, please verify'**
+  String get orderScanSuccess;
+
+  /// No description provided for @orderScanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition failed: {error}'**
+  String orderScanFailed(String error);
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:

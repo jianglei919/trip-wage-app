@@ -230,6 +230,26 @@ class AppL10nEn extends AppL10n {
   String get orderDeleteConfirmMsg => 'This action cannot be undone.';
 
   @override
+  String get orderScanReceipt => 'Scan Receipt to Auto-fill';
+
+  @override
+  String get orderScanning => 'Recognizing...';
+
+  @override
+  String get orderScanFromCamera => 'Take Photo';
+
+  @override
+  String get orderScanFromGallery => 'Choose from Album';
+
+  @override
+  String get orderScanSuccess => 'Recognition done, please verify';
+
+  @override
+  String orderScanFailed(String error) {
+    return 'Recognition failed: $error';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

@@ -230,6 +230,26 @@ class AppL10nZh extends AppL10n {
   String get orderDeleteConfirmMsg => '此操作不可撤销。';
 
   @override
+  String get orderScanReceipt => '扫描收据自动填写';
+
+  @override
+  String get orderScanning => '识别中...';
+
+  @override
+  String get orderScanFromCamera => '拍照';
+
+  @override
+  String get orderScanFromGallery => '从相册选择';
+
+  @override
+  String get orderScanSuccess => '识别完成，请核对';
+
+  @override
+  String orderScanFailed(String error) {
+    return '识别失败：$error';
+  }
+
+  @override
   String get settingsTitle => '设置';
 
   @override

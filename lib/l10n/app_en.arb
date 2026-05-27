@@ -80,6 +80,17 @@
   "orderNotes": "Notes",
   "orderDeleteConfirmTitle": "Delete this order?",
   "orderDeleteConfirmMsg": "This action cannot be undone.",
+  "orderScanReceipt": "Scan Receipt to Auto-fill",
+  "orderScanning": "Recognizing...",
+  "orderScanFromCamera": "Take Photo",
+  "orderScanFromGallery": "Choose from Album",
+  "orderScanSuccess": "Recognition done, please verify",
+  "orderScanFailed": "Recognition failed: {error}",
+  "@orderScanFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
 
   "settingsTitle": "Settings",
   "settingsWageSection": "Wage Calculation",

@@ -79,6 +79,17 @@
   "orderNotes": "备注",
   "orderDeleteConfirmTitle": "删除该订单？",
   "orderDeleteConfirmMsg": "此操作不可撤销。",
+  "orderScanReceipt": "扫描收据自动填写",
+  "orderScanning": "识别中...",
+  "orderScanFromCamera": "拍照",
+  "orderScanFromGallery": "从相册选择",
+  "orderScanSuccess": "识别完成，请核对",
+  "orderScanFailed": "识别失败：{error}",
+  "@orderScanFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
 
   "settingsTitle": "设置",
   "settingsWageSection": "工资计算参数",

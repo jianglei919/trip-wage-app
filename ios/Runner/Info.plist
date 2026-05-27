@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>用于拍照识别收据自动填写订单</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>用于从相册选择收据图片自动识别</string>
 </dict>
 </plist>

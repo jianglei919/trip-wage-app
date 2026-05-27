@@ -2,8 +2,12 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../core/db/database.dart';
+import '../core/ocr/receipt_parser.dart';
+import '../core/ocr/receipt_scanner.dart';
+import '../core/theme/accents.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/providers.dart';
 
@@ -49,6 +53,8 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
   late TextEditingController _address;
   late TextEditingController _notes;
   bool _saving = false;
+  bool _scanning = false;
+  final ReceiptScanner _scanner = ReceiptScanner();
 
   @override
   void initState() {
@@ -94,7 +100,106 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
     _distanceKm.dispose();
     _address.dispose();
     _notes.dispose();
+    _scanner.dispose();
     super.dispose();
+  }
+
+  Future<void> _scanReceipt() async {
+    final t = AppL10n.of(context)!;
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: Text(t.orderScanFromCamera),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(t.orderScanFromGallery),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
+    setState(() => _scanning = true);
+    try {
+      final result = await _scanner.scan(source: source);
+      if (!mounted) return;
+      if (result == null) return;
+      debugPrint('=== RAW OCR TEXT ===\n${result.rawText}\n=== END ===');
+      _applyParsedReceipt(result.parsed);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t.orderScanSuccess),
+          action: SnackBarAction(
+            label: '查看原文',
+            onPressed: () => _showRawText(result.rawText),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.orderScanFailed(e.toString()))),
+      );
+    } finally {
+      if (mounted) setState(() => _scanning = false);
+    }
+  }
+
+  void _showRawText(String text) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('OCR 原始文本'),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            text,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: text));
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                const SnackBar(content: Text('已复制到剪贴板')),
+              );
+            },
+            child: const Text('复制'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _applyParsedReceipt(ParsedReceipt r) {
+    setState(() {
+      if (r.date != null) _date = r.date!;
+      if (r.paymentType != null) _paymentType = r.paymentType!;
+      if (r.orderNumber != null && _orderNumber.text.trim().isEmpty) {
+        _orderNumber.text = r.orderNumber!;
+      }
+      if (r.orderValue != null && _orderValue.text.trim().isEmpty) {
+        _orderValue.text = _trim(r.orderValue!);
+      }
+      if (r.tip != null && _tip.text.trim().isEmpty) {
+        _tip.text = _trim(r.tip!);
+      }
+      if (r.address != null && _address.text.trim().isEmpty) {
+        _address.text = r.address!;
+      }
+    });
   }
 
   double _num(TextEditingController c) => double.tryParse(c.text.trim()) ?? 0;
@@ -220,6 +325,7 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
           ),
           const SizedBox(height: 12),
 
+
           Row(children: [
             Expanded(
               child: OutlinedButton.icon(
@@ -311,6 +417,32 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
               ),
             ],
           ),
+          if (widget.existing == null) ...[
+            const SizedBox(height: 12),
+            Builder(builder: (context) {
+              final b = Theme.of(context).brightness;
+              final accent = AppAccents.teal;
+              return FilledButton.icon(
+                onPressed: (_saving || _scanning) ? null : _scanReceipt,
+                style: FilledButton.styleFrom(
+                  backgroundColor: accent.bgFor(b),
+                  foregroundColor: accent.fgFor(b),
+                  minimumSize: const Size.fromHeight(44),
+                ),
+                icon: _scanning
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: accent.fgFor(b),
+                        ),
+                      )
+                    : const Icon(Icons.document_scanner_outlined, size: 18),
+                label: Text(_scanning ? t.orderScanning : t.orderScanReceipt),
+              );
+            }),
+          ],
         ],
       ),
     );
