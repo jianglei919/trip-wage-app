@@ -740,21 +740,13 @@ class _OrderTile extends ConsumerWidget {
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold)),
                   if (c.tipsTotal > 0) ...[
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppAccents.amber.bgFor(b),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '${t.dashboardTips} \$${c.tipsTotal.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppAccents.amber.fgFor(b),
-                        ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${t.dashboardTips} \$${c.tipsTotal.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppAccents.amber.fgFor(b),
                       ),
                     ),
                   ],
