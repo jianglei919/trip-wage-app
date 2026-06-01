@@ -21,6 +21,15 @@ final _rangeOrdersProvider =
   return repo.watchByDateRange(start, end);
 });
 
+final _rangeWorkTimesProvider =
+    StreamProvider.autoDispose.family<List<WorkTime>, int>((ref, days) {
+  final repo = ref.watch(workTimeRepositoryProvider);
+  if (days <= 0) return repo.watchAll();
+  final end = todayString();
+  final start = addDays(end, -(days - 1));
+  return repo.watchByDateRange(start, end);
+});
+
 class TripsPage extends ConsumerWidget {
   const TripsPage({super.key});
 
@@ -29,6 +38,7 @@ class TripsPage extends ConsumerWidget {
     final t = AppL10n.of(context)!;
     final days = ref.watch(_rangeDaysProvider);
     final ordersAsync = ref.watch(_rangeOrdersProvider(days));
+    final workTimesAsync = ref.watch(_rangeWorkTimesProvider(days));
     final settingsAsync = ref.watch(settingsStreamProvider);
 
     return Scaffold(
@@ -64,6 +74,10 @@ class TripsPage extends ConsumerWidget {
                   style: TextStyle(color: Colors.grey.shade600)),
             );
           }
+          final workTimes = workTimesAsync.valueOrNull ?? const <WorkTime>[];
+          final hoursByDate = <String, double>{
+            for (final w in workTimes) w.date: w.workHours,
+          };
           // 按日期分组（降序）
           final grouped = groupBy(orders, (Order o) => o.date);
           final dates = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
@@ -78,6 +92,7 @@ class TripsPage extends ConsumerWidget {
               return _DayCard(
                 date: date,
                 orders: dayOrders,
+                workHours: hoursByDate[date] ?? 0,
                 params: params,
                 onTap: () {
                   ref.read(currentDateProvider.notifier).state = date;
@@ -96,11 +111,13 @@ class _DayCard extends StatelessWidget {
   const _DayCard({
     required this.date,
     required this.orders,
+    required this.workHours,
     required this.params,
     required this.onTap,
   });
   final String date;
   final List<Order> orders;
+  final double workHours;
   final WageParams params;
   final VoidCallback onTap;
 
@@ -109,10 +126,10 @@ class _DayCard extends StatelessWidget {
     final t = AppL10n.of(context)!;
     final summary = calcDailySummary(
       orders: orders,
-      workHours: 0,
+      workHours: workHours,
       params: params,
     );
-    final income = summary.fuelFeeTotal + summary.totalTips;
+    final baseAndFuel = summary.basePayment + summary.fuelFeeTotal;
     final scheme = Theme.of(context).colorScheme;
 
     return Material(
@@ -141,15 +158,20 @@ class _DayCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${summary.actualTrips} ${t.dashboardOrders}'
-                      ' · ${summary.totalDistance.toStringAsFixed(1)} ${t.commonKm}'
-                      ' · ${t.dashboardTips} \$${summary.totalTips.toStringAsFixed(2)}',
+                      ' · ${summary.totalDistance.toStringAsFixed(1)} ${t.commonKm}',
                       style: TextStyle(
                           fontSize: 12, color: scheme.onSurfaceVariant),
+                    ),
+                    Text(
+                      '${t.dashboardBaseAndFuel} \$${baseAndFuel.toStringAsFixed(2)}'
+                      ' · ${t.dashboardTips} \$${summary.totalTips.toStringAsFixed(2)}',
+                      style: TextStyle(
+                          fontSize: 11, color: scheme.onSurfaceVariant),
                     ),
                   ],
                 ),
               ),
-              Text('\$${income.toStringAsFixed(2)}',
+              Text('\$${summary.totalWage.toStringAsFixed(2)}',
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold)),
               const Icon(Icons.chevron_right),

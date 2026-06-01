@@ -22,6 +22,10 @@ class WorkTimeRepository {
         .watch();
   }
 
+  Stream<List<WorkTime>> watchAll() {
+    return _db.select(_db.workTimes).watch();
+  }
+
   /// 每天一条，按 date upsert
   Future<void> upsert({
     required String date,

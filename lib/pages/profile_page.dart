@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/backup_export.dart';
 import '../core/backup_import.dart';
-import '../core/data_migration.dart';
+import '../core/calc/order_calc.dart';
 import '../core/date_utils.dart';
 import '../core/db/database.dart';
+import '../core/excel_export.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/providers.dart';
 
@@ -124,9 +126,27 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     final t = AppL10n.of(context)!;
     final picked = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['json'],
+      allowedExtensions: [kBackupExtension, 'xlsx'],
     );
     if (picked == null || picked.files.single.path == null) return;
+    if (!mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.settingsImportConfirmTitle),
+        content: Text(t.settingsImportConfirmMsg),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(t.commonCancel)),
+          FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(t.commonDelete)),
+        ],
+      ),
+    );
+    if (ok != true) return;
     final file = File(picked.files.single.path!);
     try {
       final db = ref.read(databaseProvider);
@@ -145,30 +165,117 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
     }
   }
 
-  Future<void> _migrateNotes() async {
+  String _exportStamp() => DateTime.now()
+      .toIso8601String()
+      .replaceAll(RegExp(r'[:.]'), '-');
+
+  Future<void> _exportAllOrders() async {
     final t = AppL10n.of(context)!;
-    final ok = await showDialog<bool>(
+    try {
+      final orders = await ref.read(orderRepositoryProvider).getAll();
+      if (orders.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.settingsExportNoOrders)),
+        );
+        return;
+      }
+      if (!mounted) return;
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(t.settingsExportAllConfirmTitle),
+          content: Text(t.settingsExportAllConfirmMsg(orders.length)),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(t.commonCancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(t.commonExport)),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      final params = WageParams.fromSettings(
+          ref.read(settingsStreamProvider).requireValue);
+      final result = await exportOrdersToExcel(
+        orders: orders,
+        params: params,
+        filenameStem: 'tripwage-all-${_exportStamp()}',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            t.settingsExportOrdersSuccess(result.count, result.filename)),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(t.settingsExportFailed(e.toString())),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> _exportOrdersByDate() async {
+    final t = AppL10n.of(context)!;
+    final picked = await showDatePicker(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t.settingsMigrateNotes),
-        content: Text(t.settingsMigrateNotesConfirm),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(t.commonCancel)),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(t.commonSave)),
-        ],
-      ),
+      initialDate: parseLocal(todayString()),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
     );
-    if (ok != true) return;
-    final db = ref.read(databaseProvider);
-    final count = await copyNotesToEmptyAddress(db);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.settingsMigrateNotesResult(count))),
-    );
+    if (picked == null) return;
+    final date = formatLocal(picked);
+    try {
+      final orders =
+          await ref.read(orderRepositoryProvider).getByDate(date);
+      if (orders.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.settingsExportNoOrders)),
+        );
+        return;
+      }
+      final params = WageParams.fromSettings(
+          ref.read(settingsStreamProvider).requireValue);
+      final result = await exportOrdersToExcel(
+        orders: orders,
+        params: params,
+        filenameStem: 'tripwage-$date',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            t.settingsExportOrdersSuccess(result.count, result.filename)),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(t.settingsExportFailed(e.toString())),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> _exportBackup() async {
+    final t = AppL10n.of(context)!;
+    try {
+      final db = ref.read(databaseProvider);
+      final result = await exportBackupToFile(db);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            t.settingsExportSuccess(result.orders, result.workTimes)),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(t.settingsExportFailed(e.toString())),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
   Future<void> _reset() async {
@@ -304,11 +411,27 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.swap_horiz),
-              title: Text(t.settingsMigrateNotes),
-              subtitle: Text(t.settingsMigrateNotesHint,
+              leading: const Icon(Icons.download),
+              title: Text(t.settingsExportBackup),
+              subtitle: Text(t.settingsExportHint,
                   style: const TextStyle(fontSize: 11)),
-              onTap: _migrateNotes,
+              onTap: _exportBackup,
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.table_view),
+              title: Text(t.settingsExportAllOrders),
+              subtitle: Text(t.settingsExportAllOrdersHint,
+                  style: const TextStyle(fontSize: 11)),
+              onTap: _exportAllOrders,
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.event_note),
+              title: Text(t.settingsExportByDate),
+              subtitle: Text(t.settingsExportByDateHint,
+                  style: const TextStyle(fontSize: 11)),
+              onTap: _exportOrdersByDate,
             ),
           ]),
         ),

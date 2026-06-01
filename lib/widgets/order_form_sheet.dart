@@ -22,6 +22,10 @@ Future<void> showOrderFormSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    showDragHandle: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 0.92,
+    ),
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -300,17 +304,6 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade400,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
           Row(
             children: [
               Text(widget.existing == null ? t.orderAddTitle : t.orderEditTitle,
@@ -323,28 +316,66 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
                 ),
             ],
           ),
+          if (widget.existing == null) ...[
+            const SizedBox(height: 8),
+            Builder(builder: (context) {
+              final b = Theme.of(context).brightness;
+              final accent = AppAccents.teal;
+              return FilledButton.icon(
+                onPressed: (_saving || _scanning) ? null : _scanReceipt,
+                style: FilledButton.styleFrom(
+                  backgroundColor: accent.bgFor(b),
+                  foregroundColor: accent.fgFor(b),
+                  minimumSize: const Size.fromHeight(40),
+                ),
+                icon: _scanning
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: accent.fgFor(b),
+                        ),
+                      )
+                    : const Icon(Icons.document_scanner_outlined, size: 18),
+                label:
+                    Text(_scanning ? t.orderScanning : t.orderScanReceipt),
+              );
+            }),
+          ],
           const SizedBox(height: 12),
 
 
-          Row(children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _pickDate,
-                icon: const Icon(Icons.calendar_today, size: 16),
-                label: Text(_date),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _orderNumber,
-                decoration: InputDecoration(
-                  labelText: t.orderNumber,
-                  isDense: true,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: _pickDate,
+                  borderRadius: BorderRadius.circular(4),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: t.orderDate,
+                      isDense: true,
+                      suffixIcon:
+                          const Icon(Icons.calendar_today, size: 16),
+                    ),
+                    child: Text(_date),
+                  ),
                 ),
               ),
-            ),
-          ]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _orderNumber,
+                  decoration: InputDecoration(
+                    labelText: t.orderNumber,
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
 
           DropdownButtonFormField<String>(
@@ -385,6 +416,7 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
             controller: _address,
             decoration: InputDecoration(
               labelText: t.orderAddress,
+              hintText: '1525 Dufferin Pl, Windsor, ON N8X 3K6',
               prefixIcon: const Icon(Icons.location_on_outlined, size: 18),
               isDense: true,
             ),
@@ -392,13 +424,13 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
           const SizedBox(height: 12),
           TextField(
             controller: _notes,
-            maxLines: 2,
+            maxLines: 1,
             decoration: InputDecoration(
               labelText: t.orderNotes,
               isDense: true,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           Row(
             children: [
@@ -417,32 +449,6 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
               ),
             ],
           ),
-          if (widget.existing == null) ...[
-            const SizedBox(height: 12),
-            Builder(builder: (context) {
-              final b = Theme.of(context).brightness;
-              final accent = AppAccents.teal;
-              return FilledButton.icon(
-                onPressed: (_saving || _scanning) ? null : _scanReceipt,
-                style: FilledButton.styleFrom(
-                  backgroundColor: accent.bgFor(b),
-                  foregroundColor: accent.fgFor(b),
-                  minimumSize: const Size.fromHeight(44),
-                ),
-                icon: _scanning
-                    ? SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: accent.fgFor(b),
-                        ),
-                      )
-                    : const Icon(Icons.document_scanner_outlined, size: 18),
-                label: Text(_scanning ? t.orderScanning : t.orderScanReceipt),
-              );
-            }),
-          ],
         ],
       ),
     );

@@ -55,7 +55,7 @@ class AppSettings extends Table {
       text().withDefault(const Constant('2026-04-20'))();
 
   // 用户偏好
-  TextColumn get currency => text().withDefault(const Constant('USD'))();
+  TextColumn get currency => text().withDefault(const Constant('CAD'))();
   TextColumn get locale => text().withDefault(const Constant('zh'))(); // zh | en
   TextColumn get themeMode =>
       text().withDefault(const Constant('system'))(); // system | light | dark

@@ -36,6 +36,9 @@ class AppL10nEn extends AppL10n {
   String get commonDelete => 'Delete';
 
   @override
+  String get commonExport => 'Export';
+
+  @override
   String get commonSaving => 'Saving…';
 
   @override
@@ -96,6 +99,15 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get dashboardEnd => 'End';
+
+  @override
+  String get dashboardClearedStart => 'Cleared start time';
+
+  @override
+  String get dashboardClearedEnd => 'Cleared end time';
+
+  @override
+  String get commonUndo => 'Undo';
 
   @override
   String get dashboardLongTrip => 'Long';
@@ -192,6 +204,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get orderAdd => 'Add';
+
+  @override
+  String get orderDate => 'Date';
 
   @override
   String get orderNumber => 'Order #';
@@ -336,10 +351,16 @@ class AppL10nEn extends AppL10n {
   String get settingsDataSection => 'Data';
 
   @override
-  String get settingsImportBackup => 'Import backup (.json)';
+  String get settingsImportBackup => 'Import backup (.shbak)';
 
   @override
-  String get settingsImportHint => 'Import orders & work times exported from MongoDB';
+  String get settingsImportHint => 'Replaces ALL current orders & work times with the backup contents';
+
+  @override
+  String get settingsImportConfirmTitle => 'Replace all data?';
+
+  @override
+  String get settingsImportConfirmMsg => 'Importing will delete every current order and work time, then load the backup. This cannot be undone.';
 
   @override
   String settingsImportSuccess(int orders, int workTimes) {
@@ -352,17 +373,47 @@ class AppL10nEn extends AppL10n {
   }
 
   @override
-  String get settingsMigrateNotes => 'Copy notes → address';
+  String get settingsExportBackup => 'Export backup (.shbak)';
 
   @override
-  String get settingsMigrateNotesHint => 'Only fills address when it\'s empty; notes are kept';
+  String get settingsExportHint => 'Save all orders & work times as an Excel backup';
 
   @override
-  String get settingsMigrateNotesConfirm => 'Copy notes content into the address field for orders whose address is empty? Notes will be kept as-is.';
+  String get settingsExportAllOrders => 'Export all orders (.xlsx)';
 
   @override
-  String settingsMigrateNotesResult(int count) {
-    return 'Updated $count orders';
+  String get settingsExportAllOrdersHint => 'Save every order to a single Excel file';
+
+  @override
+  String get settingsExportAllConfirmTitle => 'Export all orders?';
+
+  @override
+  String settingsExportAllConfirmMsg(int count) {
+    return 'Export $count orders to Excel?';
+  }
+
+  @override
+  String get settingsExportByDate => 'Export by date (.xlsx)';
+
+  @override
+  String get settingsExportByDateHint => 'Pick a date and export that day\'s orders';
+
+  @override
+  String settingsExportOrdersSuccess(int count, String filename) {
+    return 'Exported $count orders → $filename';
+  }
+
+  @override
+  String get settingsExportNoOrders => 'No orders to export';
+
+  @override
+  String settingsExportSuccess(int orders, int workTimes) {
+    return 'Exported $orders orders, $workTimes work times';
+  }
+
+  @override
+  String settingsExportFailed(String error) {
+    return 'Export failed: $error';
   }
 
   @override

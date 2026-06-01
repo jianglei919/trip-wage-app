@@ -149,6 +149,12 @@ abstract class AppL10n {
   /// **'Delete'**
   String get commonDelete;
 
+  /// No description provided for @commonExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get commonExport;
+
   /// No description provided for @commonSaving.
   ///
   /// In en, this message translates to:
@@ -256,6 +262,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'End'**
   String get dashboardEnd;
+
+  /// No description provided for @dashboardClearedStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared start time'**
+  String get dashboardClearedStart;
+
+  /// No description provided for @dashboardClearedEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared end time'**
+  String get dashboardClearedEnd;
+
+  /// No description provided for @commonUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
 
   /// No description provided for @dashboardLongTrip.
   ///
@@ -448,6 +472,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Add'**
   String get orderAdd;
+
+  /// No description provided for @orderDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get orderDate;
 
   /// No description provided for @orderNumber.
   ///
@@ -716,14 +746,26 @@ abstract class AppL10n {
   /// No description provided for @settingsImportBackup.
   ///
   /// In en, this message translates to:
-  /// **'Import backup (.json)'**
+  /// **'Import backup (.shbak)'**
   String get settingsImportBackup;
 
   /// No description provided for @settingsImportHint.
   ///
   /// In en, this message translates to:
-  /// **'Import orders & work times exported from MongoDB'**
+  /// **'Replaces ALL current orders & work times with the backup contents'**
   String get settingsImportHint;
+
+  /// No description provided for @settingsImportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all data?'**
+  String get settingsImportConfirmTitle;
+
+  /// No description provided for @settingsImportConfirmMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing will delete every current order and work time, then load the backup. This cannot be undone.'**
+  String get settingsImportConfirmMsg;
 
   /// No description provided for @settingsImportSuccess.
   ///
@@ -737,29 +779,77 @@ abstract class AppL10n {
   /// **'Import failed: {error}'**
   String settingsImportFailed(String error);
 
-  /// No description provided for @settingsMigrateNotes.
+  /// No description provided for @settingsExportBackup.
   ///
   /// In en, this message translates to:
-  /// **'Copy notes → address'**
-  String get settingsMigrateNotes;
+  /// **'Export backup (.shbak)'**
+  String get settingsExportBackup;
 
-  /// No description provided for @settingsMigrateNotesHint.
+  /// No description provided for @settingsExportHint.
   ///
   /// In en, this message translates to:
-  /// **'Only fills address when it\'s empty; notes are kept'**
-  String get settingsMigrateNotesHint;
+  /// **'Save all orders & work times as an Excel backup'**
+  String get settingsExportHint;
 
-  /// No description provided for @settingsMigrateNotesConfirm.
+  /// No description provided for @settingsExportAllOrders.
   ///
   /// In en, this message translates to:
-  /// **'Copy notes content into the address field for orders whose address is empty? Notes will be kept as-is.'**
-  String get settingsMigrateNotesConfirm;
+  /// **'Export all orders (.xlsx)'**
+  String get settingsExportAllOrders;
 
-  /// No description provided for @settingsMigrateNotesResult.
+  /// No description provided for @settingsExportAllOrdersHint.
   ///
   /// In en, this message translates to:
-  /// **'Updated {count} orders'**
-  String settingsMigrateNotesResult(int count);
+  /// **'Save every order to a single Excel file'**
+  String get settingsExportAllOrdersHint;
+
+  /// No description provided for @settingsExportAllConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all orders?'**
+  String get settingsExportAllConfirmTitle;
+
+  /// No description provided for @settingsExportAllConfirmMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Export {count} orders to Excel?'**
+  String settingsExportAllConfirmMsg(int count);
+
+  /// No description provided for @settingsExportByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Export by date (.xlsx)'**
+  String get settingsExportByDate;
+
+  /// No description provided for @settingsExportByDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date and export that day\'s orders'**
+  String get settingsExportByDateHint;
+
+  /// No description provided for @settingsExportOrdersSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} orders → {filename}'**
+  String settingsExportOrdersSuccess(int count, String filename);
+
+  /// No description provided for @settingsExportNoOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders to export'**
+  String get settingsExportNoOrders;
+
+  /// No description provided for @settingsExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {orders} orders, {workTimes} work times'**
+  String settingsExportSuccess(int orders, int workTimes);
+
+  /// No description provided for @settingsExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String settingsExportFailed(String error);
 
   /// No description provided for @settingsAboutSection.
   ///

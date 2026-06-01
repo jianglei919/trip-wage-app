@@ -60,6 +60,12 @@ class OrderRepository {
         .watch();
   }
 
+  Future<List<Order>> getAll() {
+    return (_db.select(_db.orders)
+          ..orderBy([(t) => OrderingTerm.asc(t.date)]))
+        .get();
+  }
+
   /// 监听某区间所有订单
   Stream<List<Order>> watchByDateRange(String startDate, String endDate) {
     return (_db.select(_db.orders)

@@ -17,7 +17,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -31,6 +31,12 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             await m.addColumn(orders, orders.address);
+          }
+          if (from < 3) {
+            // 把之前默认的 'USD' 升级到新的默认 'CAD'
+            await (update(appSettings)
+                  ..where((t) => t.currency.equals('USD')))
+                .write(const AppSettingsCompanion(currency: Value('CAD')));
           }
         },
       );

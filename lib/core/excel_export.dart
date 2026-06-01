@@ -8,8 +8,14 @@ import 'package:share_plus/share_plus.dart';
 import 'calc/order_calc.dart';
 import 'db/database.dart';
 
+class OrderExportResult {
+  const OrderExportResult({required this.count, required this.filename});
+  final int count;
+  final String filename;
+}
+
 /// 把订单列表导出为 .xlsx 并唤起系统分享
-Future<void> exportOrdersToExcel({
+Future<OrderExportResult> exportOrdersToExcel({
   required List<Order> orders,
   required WageParams params,
   required String filenameStem,
@@ -54,8 +60,10 @@ Future<void> exportOrdersToExcel({
   if (bytes == null) throw Exception('Failed to encode xlsx');
 
   final dir = await getTemporaryDirectory();
-  final file = File(p.join(dir.path, '$filenameStem.xlsx'));
+  final filename = '$filenameStem.xlsx';
+  final file = File(p.join(dir.path, filename));
   await file.writeAsBytes(bytes);
 
-  await Share.shareXFiles([XFile(file.path)], text: filenameStem);
+  await Share.shareXFiles([XFile(file.path)]);
+  return OrderExportResult(count: orders.length, filename: filename);
 }

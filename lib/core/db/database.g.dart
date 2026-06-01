@@ -1258,7 +1258,7 @@ class $AppSettingsTable extends AppSettings
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('USD'),
+    defaultValue: const Constant('CAD'),
   );
   static const VerificationMeta _localeMeta = const VerificationMeta('locale');
   @override

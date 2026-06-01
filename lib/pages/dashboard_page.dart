@@ -219,6 +219,37 @@ class _WorkTimeCardState extends ConsumerState<_WorkTimeCard> {
         );
   }
 
+  Future<void> _clear(bool isStart) async {
+    final wt = widget.workTime;
+    final prevStart = wt?.startTime ?? '';
+    final prevEnd = wt?.endTime ?? '';
+    final start = isStart ? '' : prevStart;
+    final end = isStart ? prevEnd : '';
+    await ref.read(workTimeRepositoryProvider).upsert(
+          date: widget.date,
+          startTime: start,
+          endTime: end,
+          workHours: calcWorkHours(start, end),
+        );
+    if (!mounted) return;
+    final t = AppL10n.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+          isStart ? t.dashboardClearedStart : t.dashboardClearedEnd),
+      action: SnackBarAction(
+        label: t.commonUndo,
+        onPressed: () async {
+          await ref.read(workTimeRepositoryProvider).upsert(
+                date: widget.date,
+                startTime: prevStart,
+                endTime: prevEnd,
+                workHours: calcWorkHours(prevStart, prevEnd),
+              );
+        },
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppL10n.of(context)!;
@@ -248,41 +279,64 @@ class _WorkTimeCardState extends ConsumerState<_WorkTimeCard> {
         gradient: gradient,
         borderRadius: BorderRadius.circular(16),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.12)
                   : Colors.white.withValues(alpha: 0.7),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.access_time, color: fg, size: 20),
+            child: Icon(Icons.access_time, color: fg, size: 18),
           ),
           const SizedBox(width: 8),
           Text(t.dashboardWorkTime,
-              style: TextStyle(color: fg, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 12),
+              style: TextStyle(
+                  color: fg, fontWeight: FontWeight.w600, fontSize: 13)),
+          const SizedBox(width: 8),
           Expanded(
             child: Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      minimumSize: const Size(0, 32),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     onPressed: () => _pick(true),
-                    child: Text(start.isEmpty ? t.dashboardStart : start),
+                    onLongPress: start.isEmpty ? null : () => _clear(true),
+                    child: Text(
+                      start.isEmpty ? t.dashboardStart : start,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
                   ),
                 ),
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 2),
                   child: Text('-'),
                 ),
                 Expanded(
                   child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      minimumSize: const Size(0, 32),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     onPressed: () => _pick(false),
-                    child: Text(end.isEmpty ? t.dashboardEnd : end),
+                    onLongPress: end.isEmpty ? null : () => _clear(false),
+                    child: Text(
+                      end.isEmpty ? t.dashboardEnd : end,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
                   ),
                 ),
               ],
@@ -291,9 +345,7 @@ class _WorkTimeCardState extends ConsumerState<_WorkTimeCard> {
           const SizedBox(width: 8),
           Text('${hours.toStringAsFixed(1)}${t.commonHours}',
               style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: fg)),
+                  fontSize: 15, fontWeight: FontWeight.bold, color: fg)),
         ],
       ),
     );
@@ -656,6 +708,26 @@ class _OrderTile extends ConsumerWidget {
                       style: TextStyle(
                           fontSize: 12, color: scheme.onSurfaceVariant),
                     ),
+                    if (order.address.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined,
+                              size: 12, color: scheme.onSurfaceVariant),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              order.address,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: scheme.onSurfaceVariant),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -667,11 +739,25 @@ class _OrderTile extends ConsumerWidget {
                   Text('\$${c.totalIncome.toStringAsFixed(2)}',
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(
-                    '${t.dashboardTips} \$${c.tipsTotal.toStringAsFixed(2)}',
-                    style: TextStyle(
-                        fontSize: 11, color: scheme.onSurfaceVariant),
-                  ),
+                  if (c.tipsTotal > 0) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppAccents.amber.bgFor(b),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${t.dashboardTips} \$${c.tipsTotal.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppAccents.amber.fgFor(b),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],

@@ -36,6 +36,9 @@ class AppL10nZh extends AppL10n {
   String get commonDelete => '删除';
 
   @override
+  String get commonExport => '导出';
+
+  @override
   String get commonSaving => '保存中…';
 
   @override
@@ -96,6 +99,15 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get dashboardEnd => '结束';
+
+  @override
+  String get dashboardClearedStart => '已清空开始时间';
+
+  @override
+  String get dashboardClearedEnd => '已清空结束时间';
+
+  @override
+  String get commonUndo => '撤销';
 
   @override
   String get dashboardLongTrip => '长单';
@@ -192,6 +204,9 @@ class AppL10nZh extends AppL10n {
 
   @override
   String get orderAdd => '加单';
+
+  @override
+  String get orderDate => '日期';
 
   @override
   String get orderNumber => '单号';
@@ -330,10 +345,16 @@ class AppL10nZh extends AppL10n {
   String get settingsDataSection => '数据';
 
   @override
-  String get settingsImportBackup => '导入备份 (.json)';
+  String get settingsImportBackup => '导入备份 (.shbak)';
 
   @override
-  String get settingsImportHint => '导入从 MongoDB 导出的订单与工时数据';
+  String get settingsImportHint => '用备份内容覆盖当前所有订单与工时';
+
+  @override
+  String get settingsImportConfirmTitle => '替换所有数据？';
+
+  @override
+  String get settingsImportConfirmMsg => '导入会先删除当前全部订单与工时，再从备份载入。此操作无法撤销。';
 
   @override
   String settingsImportSuccess(int orders, int workTimes) {
@@ -346,17 +367,47 @@ class AppL10nZh extends AppL10n {
   }
 
   @override
-  String get settingsMigrateNotes => '备注内容迁移到地址';
+  String get settingsExportBackup => '导出备份 (.shbak)';
 
   @override
-  String get settingsMigrateNotesHint => '仅当地址为空时填充；备注不会删除';
+  String get settingsExportHint => '将全部订单与工时保存为 Excel 备份文件';
 
   @override
-  String get settingsMigrateNotesConfirm => '把所有地址为空的订单的备注内容复制到地址字段？备注会保留不变。';
+  String get settingsExportAllOrders => '导出全部订单 (.xlsx)';
 
   @override
-  String settingsMigrateNotesResult(int count) {
-    return '已更新 $count 条订单';
+  String get settingsExportAllOrdersHint => '将所有订单保存为单个 Excel 文件';
+
+  @override
+  String get settingsExportAllConfirmTitle => '导出全部订单？';
+
+  @override
+  String settingsExportAllConfirmMsg(int count) {
+    return '将 $count 条订单导出为 Excel？';
+  }
+
+  @override
+  String get settingsExportByDate => '按日期导出 (.xlsx)';
+
+  @override
+  String get settingsExportByDateHint => '选择某天导出该日订单';
+
+  @override
+  String settingsExportOrdersSuccess(int count, String filename) {
+    return '已导出 $count 条订单 → $filename';
+  }
+
+  @override
+  String get settingsExportNoOrders => '暂无可导出的订单';
+
+  @override
+  String settingsExportSuccess(int orders, int workTimes) {
+    return '已导出 $orders 条订单、$workTimes 条工时';
+  }
+
+  @override
+  String settingsExportFailed(String error) {
+    return '导出失败：$error';
   }
 
   @override

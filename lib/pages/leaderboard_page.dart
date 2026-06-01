@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/address_key.dart';
 import '../core/calc/order_calc.dart';
 import '../core/db/database.dart';
 import '../core/theme/accents.dart';
@@ -49,33 +50,34 @@ class LeaderboardView extends ConsumerWidget {
           final params = WageParams.fromSettings(settings);
           final orders = ordersAsync.valueOrNull ?? const <Order>[];
 
-          // 按地址聚合（小写、去 trim）
-          // 空地址也聚合为 (无地址)；只是它默认排序仍按 tips
-          final grouped = groupBy(orders, (Order o) {
-            final a = o.address.trim();
-            return a.isEmpty ? '' : a;
-          });
+          // 按地址聚合：优先邮编（CA/US/SG），无邮编时按小写+折叠空白匹配。
+          // 详见 [addressGroupKey]。空地址被归到空 key，下面过滤掉。
+          final grouped = groupBy(orders, (Order o) => addressGroupKey(o.address));
 
           final stats = <_AddressStat>[];
           for (final entry in grouped.entries) {
+            if (entry.key.isEmpty) continue;
+            // 同一分组内取最长的地址做显示，保留最多信息
+            String displayAddr = '';
             double tips = 0;
             double income = 0;
             for (final o in entry.value) {
               final c = calcOrder(o, params);
               tips += c.tipsTotal;
               income += c.totalIncome;
+              final a = o.address.trim();
+              if (a.length > displayAddr.length) displayAddr = a;
             }
             stats.add(_AddressStat(
-              address: entry.key,
+              address: displayAddr,
               totalTips: tips,
               orderCount: entry.value.length,
               totalIncome: income,
               orders: entry.value,
             ));
           }
-          // 过滤：必须有地址；其余按搜索或 tips>0
+          // 过滤：搜索时按地址子串匹配；否则保留有 tips 的
           var filtered = stats.where((s) {
-            if (s.address.isEmpty) return false;
             if (query.isNotEmpty) {
               return s.address.toLowerCase().contains(query);
             }
