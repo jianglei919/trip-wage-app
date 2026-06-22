@@ -194,15 +194,6 @@ class _OrderFormSheetState extends ConsumerState<_OrderFormSheet> {
       if (r.orderNumber != null && _orderNumber.text.trim().isEmpty) {
         _orderNumber.text = r.orderNumber!;
       }
-      if (r.orderValue != null && _orderValue.text.trim().isEmpty) {
-        _orderValue.text = _trim(r.orderValue!);
-      }
-      if (r.tip != null && _tip.text.trim().isEmpty) {
-        _tip.text = _trim(r.tip!);
-      }
-      if (r.address != null && _address.text.trim().isEmpty) {
-        _address.text = r.address!;
-      }
     });
   }
 
