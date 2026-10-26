@@ -48,13 +48,23 @@ class MainScaffold extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (i) => context.go(_paths[i]),
-        indicatorColor: Colors.transparent,
+        // 选中项：图标底下一块主题色胶囊 + 标签主题色加粗，一眼能看出当前在哪
+        indicatorColor: scheme.primaryContainer,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? scheme.primary : scheme.onSurfaceVariant,
+          );
+        }),
         destinations: [
           for (var i = 0; i < _paths.length; i++)
             NavigationDestination(
               icon: Icon(_icons[i], color: scheme.onSurfaceVariant),
-              selectedIcon: Icon(_selectedIcons[i], color: scheme.primary),
+              selectedIcon: Icon(_selectedIcons[i],
+                  color: scheme.onPrimaryContainer),
               label: labels[i],
             ),
         ],
