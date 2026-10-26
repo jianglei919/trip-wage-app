@@ -97,7 +97,7 @@ class _StatsBody extends ConsumerWidget {
     final workHoursByDate = {
       for (final w in workTimes) w.date: w.workHours,
     };
-    final allDates = _dateSeq(range.start, range.end);
+    final allDates = dateSeq(range.start, range.end);
 
     final daily = <_DailyStat>[];
     for (final d in allDates) {
@@ -232,16 +232,6 @@ class _StatsBody extends ConsumerWidget {
           ),
       ],
     );
-  }
-
-  List<String> _dateSeq(String start, String end) {
-    final out = <String>[];
-    var cur = start;
-    while (cur.compareTo(end) <= 0) {
-      out.add(cur);
-      cur = addDays(cur, 1);
-    }
-    return out;
   }
 }
 
