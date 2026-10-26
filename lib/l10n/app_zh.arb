@@ -26,6 +26,7 @@
   "dashboardTotalIncome": "今日总收入",
   "dashboardBaseAndFuel": "底薪+油费",
   "dashboardTips": "小费",
+  "dashboardOrderTotal": "订单总额",
   "dashboardOrders": "订单",
   "dashboardDistance": "里程",
   "dashboardHourlyRate": "时薪",

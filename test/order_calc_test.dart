@@ -72,12 +72,13 @@ void main() {
       expect(c.tipsTotal, 4); // 25 - 20 - 2 + 1
     });
 
-    test('tips clamped to 0', () {
+    test('cash paid less than order value → negative tips', () {
       final c = calcOrder(
-        _o(orderValue: 30, paymentAmount: 20),
+        _o(paymentType: 'cash', orderValue: 30, paymentAmount: 28),
         _params,
       );
-      expect(c.tipsTotal, 0);
+      expect(c.tipsTotal, -2);
+      expect(c.totalIncome, 3.5 - 2);
     });
   });
 
@@ -115,6 +116,20 @@ void main() {
       expect(s.cashOrderValue, 15);
       expect(s.nonCashTips, 3); // online: 23 - 20
       expect(s.restaurantSettlement, 12); // 15 - 3
+      expect(s.totalOrderValue, 20 + 15);
+    });
+
+    test('negative cash tip reduces totalTips', () {
+      final s = calcDailySummary(
+        orders: [
+          _o(paymentType: 'online', orderValue: 20, paymentAmount: 23),
+          _o(paymentType: 'cash', orderValue: 30, paymentAmount: 28),
+        ],
+        workHours: 0,
+        params: _params,
+      );
+      expect(s.totalTips, 3 - 2);
+      expect(s.totalOrderValue, 50);
     });
 
     test('zero work hours → hourlyWage = 0', () {

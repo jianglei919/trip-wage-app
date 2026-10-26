@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/address_key.dart';
 import '../core/calc/order_calc.dart';
 import '../core/db/database.dart';
+import '../core/money_format.dart';
 import '../core/theme/accents.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/providers.dart';
@@ -197,7 +198,7 @@ class _RankTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '${t.leaderboardOrders(stat.orderCount)} · '
-                    '${t.leaderboardAvgTip} \$${stat.avgTip.toStringAsFixed(2)}',
+                    '${t.leaderboardAvgTip} ${formatMoney(stat.avgTip)}',
                     style: TextStyle(
                         fontSize: 11, color: scheme.onSurfaceVariant),
                   ),
@@ -208,7 +209,7 @@ class _RankTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('\$${stat.totalTips.toStringAsFixed(2)}',
+                Text(formatMoney(stat.totalTips),
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -272,8 +273,8 @@ class _AddressOrdersSheet extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${t.leaderboardOrders(stat.orderCount)} · '
-                  '\$${stat.totalTips.toStringAsFixed(2)} · '
-                  '${t.leaderboardAvgTip} \$${stat.avgTip.toStringAsFixed(2)}',
+                  '${formatMoney(stat.totalTips)} · '
+                  '${t.leaderboardAvgTip} ${formatMoney(stat.avgTip)}',
                   style:
                       TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
                 ),
@@ -378,11 +379,11 @@ class _AddressOrderTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('\$${c.totalIncome.toStringAsFixed(2)}',
+                  Text(formatMoney(c.totalIncome),
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold)),
                   Text(
-                    '${t.dashboardTips} \$${c.tipsTotal.toStringAsFixed(2)}',
+                    '${t.dashboardTips} ${formatMoney(c.tipsTotal)}',
                     style: TextStyle(
                         fontSize: 11, color: scheme.onSurfaceVariant),
                   ),

@@ -83,6 +83,9 @@ class AppL10nEn extends AppL10n {
   String get dashboardTips => 'Tips';
 
   @override
+  String get dashboardOrderTotal => 'Order total';
+
+  @override
   String get dashboardOrders => 'Orders';
 
   @override

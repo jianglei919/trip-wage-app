@@ -5,6 +5,7 @@ import '../core/calc/order_calc.dart';
 import '../core/date_utils.dart';
 import '../core/db/database.dart';
 import '../core/excel_export.dart';
+import '../core/money_format.dart';
 import '../core/theme/accents.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/providers.dart';
@@ -98,8 +99,21 @@ class DashboardPage extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _SettlementCard(summary: summary),
                 const SizedBox(height: 16),
-                Text(t.dashboardTodayOrders(orders.length),
-                    style: Theme.of(context).textTheme.titleMedium),
+                Row(
+                  children: [
+                    Text(t.dashboardTodayOrders(orders.length),
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const Spacer(),
+                    if (orders.isNotEmpty)
+                      Text(
+                        '${t.dashboardOrderTotal} ${formatMoney(summary.totalOrderValue)}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 8),
                 if (orders.isEmpty)
                   Padding(
@@ -420,7 +434,7 @@ class _SummaryCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           '${t.dashboardBaseAndFuel} \$${baseAndFuel.toStringAsFixed(2)}  ·  '
-                          '${t.dashboardTips} \$${s.totalTips.toStringAsFixed(2)}',
+                          '${t.dashboardTips} ${formatMoney(s.totalTips)}',
                           style: TextStyle(
                               fontSize: 11,
                               color: heroFgMuted),
@@ -451,7 +465,7 @@ class _SummaryCard extends StatelessWidget {
                       emphasized: true),
                   _Metric(
                       label: t.dashboardTips,
-                      value: '\$${s.totalTips.toStringAsFixed(2)}',
+                      value: formatMoney(s.totalTips),
                       icon: Icons.savings_outlined,
                       accent: AppAccents.amber,
                       emphasized: true),
@@ -736,17 +750,20 @@ class _OrderTile extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('\$${c.totalIncome.toStringAsFixed(2)}',
+                  Text(formatMoney(c.totalIncome),
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold)),
-                  if (c.tipsTotal > 0) ...[
+                  if (c.tipsTotal.abs() >= 0.005) ...[
                     const SizedBox(height: 2),
                     Text(
-                      '${t.dashboardTips} \$${c.tipsTotal.toStringAsFixed(2)}',
+                      '${t.dashboardTips} ${formatMoney(c.tipsTotal)}',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: AppAccents.amber.fgFor(b),
+                        color: (c.tipsTotal < 0
+                                ? AppAccents.pink
+                                : AppAccents.amber)
+                            .fgFor(b),
                       ),
                     ),
                   ],

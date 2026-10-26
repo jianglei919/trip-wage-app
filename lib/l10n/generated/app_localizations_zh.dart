@@ -83,6 +83,9 @@ class AppL10nZh extends AppL10n {
   String get dashboardTips => '小费';
 
   @override
+  String get dashboardOrderTotal => '订单总额';
+
+  @override
   String get dashboardOrders => '订单';
 
   @override

@@ -227,6 +227,12 @@ abstract class AppL10n {
   /// **'Tips'**
   String get dashboardTips;
 
+  /// No description provided for @dashboardOrderTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Order total'**
+  String get dashboardOrderTotal;
+
   /// No description provided for @dashboardOrders.
   ///
   /// In en, this message translates to:

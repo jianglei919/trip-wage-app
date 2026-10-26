@@ -29,6 +29,7 @@ class DailySummary {
     required this.cashOrderValue,
     required this.nonCashTips,
     required this.restaurantSettlement,
+    required this.totalOrderValue,
   });
 
   final int actualTrips;
@@ -44,6 +45,9 @@ class DailySummary {
 
   /// 正数：你欠餐馆；负数：餐馆欠你
   final double restaurantSettlement;
+
+  /// 当日所有订单的订单金额合计
+  final double totalOrderValue;
 
   int get longTrips => effectiveTrips - actualTrips;
 }
@@ -70,11 +74,11 @@ class WageParams {
 }
 
 OrderCalc calcOrder(Order order, WageParams p) {
-  final tips = order.paymentAmount -
+  // 允许为负：客人给的现金少于订单金额时，差额由司机承担
+  final tipsTotal = order.paymentAmount -
       order.orderValue -
       order.changeReturned +
       order.extraCashTip;
-  final tipsTotal = tips < 0 ? 0.0 : tips;
 
   final isLong = order.distanceKm >= p.longTripThresholdKm;
   final fuelFee = p.fuelPerOrder + (isLong ? p.longTripExtraFuel : 0.0);
@@ -98,10 +102,12 @@ DailySummary calcDailySummary({
   int effectiveTrips = 0;
   double cashOrderValue = 0;
   double nonCashTips = 0;
+  double totalOrderValue = 0;
 
   for (final o in orders) {
     final c = calcOrder(o, params);
     totalDistance += o.distanceKm * 2; // 往返
+    totalOrderValue += o.orderValue;
     totalTips += c.tipsTotal;
     fuelFeeTotal += c.fuelFee;
     effectiveTrips += c.isLongTrip ? 2 : 1;
@@ -130,6 +136,7 @@ DailySummary calcDailySummary({
     cashOrderValue: cashOrderValue,
     nonCashTips: nonCashTips,
     restaurantSettlement: cashOrderValue - nonCashTips,
+    totalOrderValue: totalOrderValue,
   );
 }
 

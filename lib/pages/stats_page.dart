@@ -7,6 +7,7 @@ import '../core/calc/order_calc.dart';
 import '../core/date_utils.dart';
 import '../core/db/database.dart';
 import '../core/excel_export.dart';
+import '../core/money_format.dart';
 import '../core/theme/accents.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/providers.dart';
@@ -389,7 +390,7 @@ class _BigTotalCard extends StatelessWidget {
             Text(
               '${t.statsBasePay} \$${basePay.toStringAsFixed(2)}  ·  '
               '${t.statsFuelSubsidy} \$${fuel.toStringAsFixed(2)}  ·  '
-              '${t.dashboardTips} \$${tips.toStringAsFixed(2)}',
+              '${t.dashboardTips} ${formatMoney(tips)}',
               style: const TextStyle(fontSize: 11),
             ),
           ],
@@ -480,12 +481,16 @@ class _StackedBarChart extends StatelessWidget {
   const _StackedBarChart({required this.daily});
   final List<_DailyStat> daily;
 
+  // 堆叠柱无法画负数段：当日小费为负时柱子里不画小费段，tooltip 仍显示真实值
+  static double _barTips(_DailyStat d) =>
+      d.summary.totalTips < 0 ? 0.0 : d.summary.totalTips;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final maxY = daily
         .map((d) =>
-            d.summary.basePayment + d.summary.fuelFeeTotal + d.summary.totalTips)
+            d.summary.basePayment + d.summary.fuelFeeTotal + _barTips(d))
         .fold<double>(0, (a, b) => a > b ? a : b) *
         1.2;
 
@@ -514,7 +519,7 @@ class _StackedBarChart extends StatelessWidget {
                           BarChartRodData(
                             toY: daily[i].summary.basePayment +
                                 daily[i].summary.fuelFeeTotal +
-                                daily[i].summary.totalTips,
+                                _barTips(daily[i]),
                             width: daily.length > 16 ? 6 : 12,
                             borderRadius: BorderRadius.circular(2),
                             rodStackItems: [
@@ -534,7 +539,7 @@ class _StackedBarChart extends StatelessWidget {
                                     daily[i].summary.fuelFeeTotal,
                                 daily[i].summary.basePayment +
                                     daily[i].summary.fuelFeeTotal +
-                                    daily[i].summary.totalTips,
+                                    _barTips(daily[i]),
                                 tipsColor,
                               ),
                             ],
@@ -600,7 +605,7 @@ class _StackedBarChart extends StatelessWidget {
                           '${d.date}\n'
                           'Base \$${d.summary.basePayment.toStringAsFixed(2)}\n'
                           'Fuel \$${d.summary.fuelFeeTotal.toStringAsFixed(2)}\n'
-                          'Tips \$${d.summary.totalTips.toStringAsFixed(2)}',
+                          'Tips ${formatMoney(d.summary.totalTips)}',
                           TextStyle(
                               color: scheme.onInverseSurface, fontSize: 11),
                         );
@@ -661,7 +666,9 @@ class _CompositionPie extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = basePay + tips + fuel.abs();
+    // 饼图无法画负数扇区：小费为负时按 0 占比，图例仍显示真实值
+    final pieTips = tips < 0 ? 0.0 : tips;
+    final total = basePay + pieTips + fuel.abs();
     final scheme = Theme.of(context).colorScheme;
     final baseColor = scheme.primary;
     final tipsColor = Colors.amber.shade400;
@@ -709,10 +716,10 @@ class _CompositionPie extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.bold)),
                   PieChartSectionData(
-                      value: tips,
+                      value: pieTips,
                       color: tipsColor,
                       radius: 38,
-                      title: pct(tips),
+                      title: pct(pieTips),
                       titleStyle: const TextStyle(
                           fontSize: 10,
                           color: Colors.white,
@@ -732,7 +739,7 @@ class _CompositionPie extends StatelessWidget {
                       '\$${fuel.abs().toStringAsFixed(2)}'),
                   const SizedBox(height: 8),
                   _legendItem(
-                      tipsColor, 'Tips', '\$${tips.toStringAsFixed(2)}'),
+                      tipsColor, 'Tips', formatMoney(tips)),
                 ],
               ),
             ),

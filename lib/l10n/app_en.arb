@@ -27,6 +27,7 @@
   "dashboardTotalIncome": "Today's Total",
   "dashboardBaseAndFuel": "Base + Fuel",
   "dashboardTips": "Tips",
+  "dashboardOrderTotal": "Order total",
   "dashboardOrders": "Orders",
   "dashboardDistance": "Distance",
   "dashboardHourlyRate": "Hourly",

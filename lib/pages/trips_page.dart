@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/calc/order_calc.dart';
 import '../core/date_utils.dart';
 import '../core/db/database.dart';
+import '../core/money_format.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/providers.dart';
 
@@ -164,7 +165,7 @@ class _DayCard extends StatelessWidget {
                     ),
                     Text(
                       '${t.dashboardBaseAndFuel} \$${baseAndFuel.toStringAsFixed(2)}'
-                      ' · ${t.dashboardTips} \$${summary.totalTips.toStringAsFixed(2)}',
+                      ' · ${t.dashboardTips} ${formatMoney(summary.totalTips)}',
                       style: TextStyle(
                           fontSize: 11, color: scheme.onSurfaceVariant),
                     ),
